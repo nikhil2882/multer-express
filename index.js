@@ -1,53 +1,39 @@
 const express = require("express");
 const fs = require("fs");
+
+const multer = require("multer");
+
+const upload = multer({ dest: "uploads" });
+
 const app = express();
 
 app.use(express.static("public"))
 app.use(express.static("uploads"))
 
-const multer  = require('multer');
-const upload = multer({ dest: 'uploads/' })
 
 app.set("view engine", "ejs");
 
-app.post("/", upload.single("profile_pic") ,function(req, res)
+app.post("/", upload.single("profile_pic"), function(req, res)
 {
   console.log(req.file);
 
-  writeFile(req.file.path, function()
+  fs.writeFile("db.txt", req.file.filename, function()
   {
-    res.send("file sucess");
+    res.send("its a big hit")
   })
+
 })
 
-app.get("/home", function(req, res)
+app.get("/profile", function(req, res)
 {
-
-  readFile(function(data)
+  fs.readFile("db.txt", "utf-8", function(e, data)
   {
-    res.render("home",{ url : data})
+    res.render("home",{ url: data });
   })
 })
-
-
 
 app.listen(3000, function()
 {
   console.log("server at  3000");
 })
 
-function readFile(callback)
-{
-  fs.readFile("./db.txt", "utf-8", function(err, data)  
-  {
-    callback(data);
-  })
-}
-
-function writeFile(data, callback)
-{
-  fs.writeFile("./db.txt",data, function(err)  
-  {
-    callback();
-  })
-}
