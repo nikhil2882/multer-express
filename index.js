@@ -11,7 +11,39 @@ app.use(express.static("uploads"));
 
 app.set("view engine","ejs");
 
-const upload = multer({ dest: "uploads" })
+const storage = multer.diskStorage({
+  destination: function(req, file , callback)
+  {
+    if(req.path === "/")
+    {
+      callback(null, "uploads/profile")
+    }
+    else
+    {
+      callback(null, "uploads/todo")
+    }
+  },
+  filename: function(req, file , callback)
+  {
+    callback(null, file.originalname);
+  },
+})
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function(req, file , callback)
+  {
+    console.log(file)
+    if(file.size < 8000)
+    {
+      callback(null, true);
+    }
+    else
+    {
+      callback("not allowed", false);
+    }
+  }, 
+})
 
 app.post("/", upload.single("profile_pic"), function(req, res)
 {
@@ -22,6 +54,7 @@ app.post("/", upload.single("profile_pic"), function(req, res)
     res.send("its a success")
   })
 })
+
 
 app.get("/profile", function(req, res)
 {
